@@ -6,6 +6,9 @@ This application is created using Flask web framework.<br />
 LetsChat helps the user to connect with friends and family.<br />
 User can create contacts list and can have chat with them with the help of their username.<br />
 
+### Main File:
+`letschat_messenger.py`
+
 ### Instructions:
 1. Install Flask using the following command:
 	```
