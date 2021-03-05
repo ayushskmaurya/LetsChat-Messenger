@@ -20,7 +20,12 @@ User can create contacts list and can have chat with them with the help of their
 	pip install flask-sqlalchemy
 	```
 
-3. Execute `create.py` to create all database tables:
+3. Install Flask-SQLAlchemy using the following command:
+	```
+	pip install cryptography
+	```
+
+4. Execute `create.py` to create all database tables:
 	```
 	python create.py
 	```
