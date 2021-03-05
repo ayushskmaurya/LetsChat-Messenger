@@ -20,7 +20,7 @@ User can create contacts list and can have chat with them with the help of their
 	pip install flask-sqlalchemy
 	```
 
-3. Install Flask-SQLAlchemy using the following command:
+3. Install cryptography module using the following command:
 	```
 	pip install cryptography
 	```
