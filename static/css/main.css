@@ -1,0 +1,77 @@
+nav.navHeader {
+	background-color: #321e46;
+}
+
+a.title {
+	color: #fff;
+	font-family: 'Noto Sans JP', sans-serif;
+}
+
+button.dropdownList {
+	border: 2px solid white;
+	color: white;
+}
+
+a.sign-in {
+	color: #fff;
+	cursor:pointer;
+}
+a.sign-in:hover {
+	font-weight: bold;
+}
+
+button.create-ac:hover {
+	opacity: 0.8;
+}
+
+input.input:focus {
+	box-shadow: none;
+	border: 2px solid #321e46;
+}
+
+button.signin, button.create {
+	background-color: #321e46;
+	color: #fff;
+}
+button.signin:hover, button.create:hover {
+	color: #fff;
+	opacity: 0.9;
+}
+
+input.uname-valid {
+	border: 1px solid #198754;
+}
+input.uname-invalid {
+	border: 1px solid #dc3545;
+}
+
+p.unameStatus-valid {
+	color: #198754;
+}
+p.unameStatus-invalid {
+	color: #dc3545;
+}
+
+button.dropdownList:focus, button.create-ac:focus, button.signin:focus, button.create:focus, button.closeModal:focus {
+	box-shadow: none;
+}
+
+div.index-carousel {
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+div.footer {
+	background-color: #f0f0f0;
+	padding: 20px;
+	text-align: center;
+}
+
+a.footer {
+	text-decoration: none;
+	color: #000;
+	font-weight: 500;
+}
+a.footer:hover {
+	font-size: 1.03rem;
+}
