@@ -3,12 +3,10 @@ div.outer-box {
 }
 
 div.chats {
-	width: 30%;
 	height: 100vh;
 }
 
 div.chat-box {
-	width: 70%;
 	height: 100vh;
 }
 
@@ -96,6 +94,41 @@ div.user-chat-header {
 	background-color: #321e46;
 	border-left: 1px solid #fff;
 	padding: 10px 10px 10px 20px;
+}
+
+button.back-button {
+	background-color: #321e46;
+	border: none;
+	color: #fff;
+	padding-bottom: 5px;
+}
+button.back-button:hover {
+	background-color: #28143c;
+}
+
+@media (min-width: 576px) {
+	div.chats {
+		width: 30%;
+	}
+	div.chat-box {
+		width: 70%;
+	}
+	button.back-button {
+		display: none;
+	}
+}
+@media (max-width: 575px) {
+	div.chats {
+		width: 100%;
+		display: block;
+	}
+	div.chat-box {
+		width: 100%;
+		display: none;
+	}
+	button.back-button {
+		display: inline-block;
+	}
 }
 
 div.user-name {

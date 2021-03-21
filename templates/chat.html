@@ -7,7 +7,7 @@
 <div class="outer-box">
 	
 	<!-- Chats division -->
-	<div class="chats">
+	<div class="chats" id="chats">
 		<!-- Chats header division -->
 		<div class="chats-header">
 			<div class="title"><a href="/chat" class="title">LetsChat Messenger</a></div>
@@ -34,10 +34,17 @@
 	</div>
 
 	<!-- Chat box division -->
-	<div class="chat-box">
+	<div class="chat-box" id="chat-box">
 		<!-- User chat header division -->
 		<div class="user-chat-header">
-			<div class="user-name" id="user-name">admin</div>
+			<div class="user-name">
+				<button type="button" class="back-button" id="back-button" onclick="back_button();">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+						<path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+					</svg>
+				</button>
+				<span id="user-name">admin</span>
+			</div>
 		</div>
 
 		<!-- Chat Window -->

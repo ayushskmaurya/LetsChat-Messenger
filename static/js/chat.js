@@ -5,6 +5,35 @@ $(document).ready(function() {
 	});
 });
 
+// Displaying user chats and chat box wrt to window size
+const chatsDiv = document.getElementById("chats");
+const chatBoxDiv = document.getElementById("chat-box");
+const mediaQuery = window.matchMedia('(max-width: 575px)');
+var showUserChats = true;
+
+window.onresize = function() {
+	if (mediaQuery.matches) {
+		if(showUserChats) {
+			chatBoxDiv.style.display = "none";
+			chatsDiv.style.display = "block";
+		}
+		else {
+			chatsDiv.style.display = "none";
+			chatBoxDiv.style.display = "block";
+		}
+	}
+	else {
+		chatsDiv.style.display = "block";
+		chatBoxDiv.style.display = "block";
+	}
+};
+
+function back_button() {
+	chatBoxDiv.style.display = "none";
+	chatsDiv.style.display = "block";
+	showUserChats = true;
+}
+
 // Show error if occured while creating contact
 function showError(errorCreateContact) {
 	document.getElementById("errorCreateContact").innerHTML = errorCreateContact;
@@ -82,6 +111,13 @@ function retrieve_chats(userid) {
 var msgCnt = 0;
 var ID = 0;
 function chat(userid, user) {
+
+	if(window.innerWidth < 576) {
+		chatsDiv.style.display = "none";
+		chatBoxDiv.style.display = "block";
+		showUserChats = false;
+	}
+
 	document.getElementById("chat-window").innerHTML = "";
 	msgCnt = 0;
 	window.clearInterval(ID);
