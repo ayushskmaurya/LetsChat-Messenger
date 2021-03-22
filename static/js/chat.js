@@ -1,3 +1,4 @@
+document.getElementById("chat-window").style.height = (window.innerHeight - 50 - 70).toString() + "px";
 $(document).ready(function() {
 	$("#message").keydown(function(event) {
 		if (event.keyCode === 13)
@@ -12,6 +13,8 @@ const mediaQuery = window.matchMedia('(max-width: 575px)');
 var showUserChats = true;
 
 window.onresize = function() {
+	document.getElementById("chat-window").style.height = (window.innerHeight - 50 - 70).toString() + "px";
+
 	if (mediaQuery.matches) {
 		if(showUserChats) {
 			chatBoxDiv.style.display = "none";
