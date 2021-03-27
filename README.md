@@ -26,7 +26,12 @@ User can create contacts list and can have chat with them with the help of their
 	pip install cryptography
 	```
 
-4. Execute `create.py` to create all database tables:
+4. Install Pillow (PIL fork) using the following command:
+	```
+	pip install Pillow
+	```
+
+5. Execute `create.py` to create all database tables:
 	```
 	python create.py
 	```

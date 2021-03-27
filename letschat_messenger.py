@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, session, redirect, escape, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from cryptography.fernet import Fernet
+from PIL import Image
 from datetime import datetime
 import random
+import os
 
 app = Flask(__name__)
 app.secret_key = str(random.randint(1111, 9999)).encode()
@@ -21,6 +23,7 @@ class Users(db.Model):
 	name = db.Column(db.String(100), nullable=False)
 	username = db.Column(db.String(100), unique=True, nullable=False)
 	password = db.Column(db.String(255), nullable=False)
+	profile_img_status = db.Column(db.Boolean, default=False, nullable=False)
 
 
 class Contacts(db.Model):
@@ -132,6 +135,25 @@ def create_contact():
 				return "1"
 
 
+# Uploading user's profile photo.
+@app.route("/upload_profile_photo", methods=['POST'])
+def upload_profile_photo():
+	photo = Image.open(request.files['profile-photo'])
+	photo = photo.convert('RGB')
+	size = min(photo.size)
+	profile_photo = photo.crop((0, 0, size, size))
+
+	photo_name = str(session['username']) + ".jpg"
+	filename = os.path.join("static\\profile_photos", photo_name)
+	profile_photo.save(filename)
+
+	user = Users.query.get_or_404(session['userid'])
+	user.profile_img_status = True
+	db.session.commit()
+	
+	return redirect("/chat")
+
+
 # Retrieving chats
 @app.route("/retrieve_chats", methods=['POST'])
 def retrieve_chats():
@@ -210,15 +232,15 @@ def chat():
 		return redirect("/")
 	
 	else:
-		sql1 = "SELECT userid, username FROM users WHERE "
+		sql1 = "SELECT userid, username, profile_img_status FROM users WHERE "
 		sql1 += "userid IN (SELECT user1id FROM chats_count WHERE user2id=:userid) OR "
 		sql1 += "userid IN (SELECT user2id FROM chats_count WHERE user1id=:userid) "
 		sql1 += "ORDER BY username"
 		chats = db.session.execute(sql1, {'userid': session['userid']})
 
-		name = db.session.query(Users.name).filter_by(userid=session['userid']).first()[0]
+		name, profile_img_status = db.session.query(Users.name, Users.profile_img_status).filter_by(userid=session['userid']).first()
 
-		sql2 = "SELECT users.userid, contacts.contactname "
+		sql2 = "SELECT users.userid, users.profile_img_status, contacts.contactname "
 		sql2 += "FROM contacts INNER JOIN users ON contacts.contactname = users.username "
 		sql2 += "WHERE contacts.userid = :userid ORDER BY contacts.contactname"
 		contacts = db.session.execute(sql2, {'userid': session['userid']})
@@ -227,6 +249,7 @@ def chat():
 		cdt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")[:19],
 		chats = chats,
 		name = name,
+		profile_img_status = profile_img_status,
 		contacts = contacts,
 		uname = session['username']
 	)

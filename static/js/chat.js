@@ -113,7 +113,7 @@ function retrieve_chats(userid) {
 // Chat Window
 var msgCnt = 0;
 var ID = 0;
-function chat(userid, user) {
+function chat(userid, user, img_status) {
 
 	if(window.innerWidth < 576) {
 		chatsDiv.style.display = "none";
@@ -126,15 +126,18 @@ function chat(userid, user) {
 	window.clearInterval(ID);
 	ID = window.setInterval(retrieve_chats, 1000, userid);
 
+	document.getElementById("set-user-profile-img").setAttribute("onclick", "viewProfilePhoto('" + user + "');");
+	set_profile_photo("user-profile-img", "user-default-profile-img", "set-user-profile-img", user, img_status);
+
 	document.getElementById("user-name").innerHTML = user;
 	document.getElementById("message").value = "";
 	document.getElementById("send").setAttribute("onclick", "sendMsg('"+ userid +"')");
 }
 
 // Closing contact modal
-function chatWithContact(userid, user) {
+function chatWithContact(userid, user, img_status) {
 	$("#contactsModal").modal("hide");
-	chat(userid, user);
+	chat(userid, user, img_status);
 }
 
 // Sending Message
@@ -148,4 +151,10 @@ function sendMsg(userid) {
 			document.getElementById("message").value = "";
 		}
 	});
+}
+
+// View Profile Photo of any user
+function viewProfilePhoto(user) {
+	document.getElementById("viewProfilePhoto").src = "/static/profile_photos/" + user + ".jpg";
+	$('#viewProfilePhotoModal').modal('show'); 
 }

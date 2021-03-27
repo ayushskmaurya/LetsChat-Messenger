@@ -2,6 +2,9 @@
 {% block css %}
 <link rel='stylesheet' type='text/css' href="{{ url_for('static', filename='css/chat.css') }}">
 {% endblock %}
+{% block js %}
+<script src="{{ url_for('static', filename='js/profile_img.js') }}"></script>
+{% endblock %}
 
 {% block body %}
 <div class="outer-box">
@@ -28,7 +31,19 @@
 			{% for chat in chats %}
 				{% set userid = chat['userid'] %}
 				{% set username = chat['username'] %}
-				<button class="user-chat" onclick="chat('{{ userid }}', '{{ username }}');">{{ username }}</button>
+				{% set img_status = chat['profile_img_status'] %}
+				<button class="user-chat" onclick="chat('{{ userid }}', '{{ username }}', '{{ img_status }}');">
+		
+					<div class="profile-image" id="user-{{ username }}-default-profile-img" style="color: #321e46;">
+						{% include 'default_profile_img.html' %}
+					</div>
+					<div class="profile-image" id="user-{{ username }}-profile-img" style="display: none;">
+						<img class="profile-image" id="set-user-{{ username }}-profile-img" src="#" onclick="viewProfilePhoto('{{ username }}');">
+					</div>
+		
+					{{ username }}
+				</button>
+				<script>set_profile_photo("user-{{ username }}-profile-img", "user-{{ username }}-default-profile-img", "set-user-{{ username }}-profile-img", "{{ username }}", "{{ img_status }}");</script>
 			{% endfor %}
 		</div>
 	</div>
@@ -43,6 +58,14 @@
 						<path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
 					</svg>
 				</button>
+
+				<div class="profile-image" id="user-default-profile-img">
+					{% include 'default_profile_img.html' %}
+				</div>
+				<div class="profile-image" id="user-profile-img" style="display: none;">
+					<img class="profile-image" id="set-user-profile-img" src="#">
+				</div>
+
 				<span id="user-name">admin</span>
 			</div>
 		</div>
@@ -82,7 +105,19 @@
 				{% for contact in contacts %}
 					{% set userid = contact['userid'] %}
 					{% set contactname = contact['contactname'] %}
-					<button class="contact" onclick="chatWithContact('{{ userid }}', '{{ contactname }}');">{{ contactname }}</button>
+					{% set img_status = contact['profile_img_status'] %}
+					<button class="contact" onclick="chatWithContact('{{ userid }}', '{{ contactname }}', '{{ img_status }}');">
+					
+						<div class="profile-image" id="contact-{{ contactname }}-default-profile-img" style="color: #321e46;">
+							{% include 'default_profile_img.html' %}
+						</div>
+						<div class="profile-image" id="contact-{{ contactname }}-profile-img" style="display: none;">
+							<img class="profile-image" id="set-contact-{{ contactname }}-profile-img" src="#" onclick="viewProfilePhoto('{{ contactname }}');">
+						</div>
+
+						{{ contactname }}
+					</button>
+					<script>set_profile_photo("contact-{{ contactname }}-profile-img", "contact-{{ contactname }}-default-profile-img", "set-contact-{{ contactname }}-profile-img", "{{ contactname }}", "{{ img_status }}");</script>
 				{% endfor %}
 			</div>
 		</div>
@@ -122,6 +157,22 @@
 			</div>
 			<div class="modal-body">
 				<div class="mb-3">
+
+					<div class="profile-image" id="default-profile-img" style="color: #321e46;">
+						{% include 'default_profile_img.html' %}
+					</div>
+					<div class="profile-image" id="profile-img" style="display: none;">
+						<img class="profile-image" id="set-profile-img" src="#" onclick="viewProfilePhoto('{{ uname }}');">
+					</div>
+					<script>set_profile_photo("profile-img", "default-profile-img", "set-profile-img", "{{ uname }}", "{{ profile_img_status }}");</script>
+
+					<a href="#" data-bs-toggle="modal" data-bs-target="#profilePhotoModal">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill edit" viewBox="0 0 16 16">
+							<path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+						</svg>
+					</a>
+				</div>
+				<div class="mb-3">
 					<span class="plabel">Name:</span>
 					<p class="pinfo">{{ name }}</p>
 				</div>
@@ -130,6 +181,43 @@
 					<p class="pinfo">{{ uname }}</p>
 				</div>
 			</div>
+		</div>
+	</div>
+</div>
+
+<!-- View Profile Photo Modal -->
+<div class="modal fade" id="viewProfilePhotoModal" tabindex="-1" aria-labelledby="viewProfilePhotoModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="btn-close closeModal" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<img class="viewProfilePhoto" id="viewProfilePhoto" src="#">
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Update Profile Photo Modal -->
+<div class="modal fade" id="profilePhotoModal" tabindex="-1" aria-labelledby="profilePhotoModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="profilePhotoModalLabel">Update Profile Photo</h5>
+				<button type="button" class="btn-close closeModal" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<form action="/upload_profile_photo" method="POST" enctype="multipart/form-data">
+				<div class="modal-body">
+					<div class="mb-3">
+						<input type="file" class="form-control input" name="profile-photo" required>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary closeModal" data-bs-dismiss="modal">Close</button>
+					<button type="submit" class="btn update-photo">Update</button>
+				</div>
+			</form>
 		</div>
 	</div>
 </div>

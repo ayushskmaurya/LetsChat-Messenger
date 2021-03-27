@@ -234,12 +234,12 @@ button.create-contact {
 	color: #fff;
 }
 
-button.create {
+button.create, button.update-photo {
 	background-color: #321e46;
 	color: #fff;
 }
 
-button.create-contact:hover, button.create:hover {
+button.create-contact:hover, button.create:hover, button.update-photo:hover {
 	background-color: #28143c;
 	color: #fff;
 }
@@ -259,6 +259,33 @@ p.pinfo {
 	font-weight: bold;
 }
 
-button.create-contact:focus, button.create:focus, button.closeModal:focus {
+svg.edit {
+	color: #321e46;
+}
+
+button.create-contact:focus, button.create:focus, button.update-photo:focus, button.closeModal:focus {
 	box-shadow: none;
+}
+
+div.profile-image {
+	height: 30px;
+	width: 30px;
+	display: inline-block;
+	border-radius: 25px;
+}
+
+img.profile-image {
+	height: 100%;
+	width: 100%;
+	border-radius: 25px;
+}
+
+svg.profile-image {
+	height: 100%;
+	width: 100%;
+}
+
+img.viewProfilePhoto {
+	height: 100%;
+	width: 100%;
 }
