@@ -28,7 +28,11 @@
 
 		<!-- User chats division -->
 		<div class="user-chats">
+			<div class="create-contact-msg" id="create-contact-msg">
+				Create new contacts to connect!
+			</div>
 			{% for chat in chats %}
+				<script>document.getElementById("create-contact-msg").style.display="none";</script>
 				{% set userid = chat['userid'] %}
 				{% set username = chat['username'] %}
 				{% set img_status = chat['profile_img_status'] %}

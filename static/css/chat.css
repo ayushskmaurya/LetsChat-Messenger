@@ -70,6 +70,15 @@ div.user-chats {
 	overflow-y: scroll;
 }
 
+div.create-contact-msg {
+	color: #343a40;
+	font-size: 1.1rem;
+	width: 200px;
+	text-align: center;
+	margin: auto;
+	margin-top: 150px;
+}
+
 button.user-chat, button.contact {
 	width: calc(100% - 20px);
 	border: none;

@@ -1,0 +1,5 @@
+letschat_messenger.db
+static/profile_photos/*
+!static/profile_photos/README.md
+
+static/other_files/

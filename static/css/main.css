@@ -56,9 +56,53 @@ button.dropdownList:focus, button.create-ac:focus, button.signin:focus, button.c
 	box-shadow: none;
 }
 
-div.index-carousel {
+div.outerBox {
+	display: flex;
+	flex-wrap: wrap;
 	margin-top: 50px;
 	margin-bottom: 50px;
+}
+
+div.letschat-carousel {
+	padding: 15px;
+}
+
+div.logo {
+	width: 70px;
+	height: 70px;
+	margin: auto;
+}
+
+@media (min-width: 768px) {
+	div.letschat {
+		width: 40%;
+	}
+	div.letschat-carousel {
+		width: 60%;
+	}
+	div.logo {
+		margin-top: 50px;
+	}
+}
+@media (max-width: 767px) {
+	div.letschat {
+		width: 100%;
+	}
+	div.letschat-carousel {
+		width: 100%;
+	}
+}
+
+img.logo {
+	width: 100%;
+	height: 100%;
+}
+
+div.connect {
+	color: #343a40;
+	font-weight: 500;
+	font-size: 1.3rem;
+	padding: 15px;
 }
 
 div.footer {
