@@ -45,6 +45,8 @@ class Chats_count(db.Model):
 	user1id = db.Column(db.Integer, db.ForeignKey('messages.user1id'), nullable=False)
 	user2id = db.Column(db.Integer, db.ForeignKey('messages.user2id'), nullable=False)
 	msgCount = db.Column(db.Integer, nullable=False)
+	clrCountUser1id = db.Column(db.Integer, default=0, nullable=False)
+	clrCountUser2id = db.Column(db.Integer, default=0, nullable=False)
 
 
 # Generating key for encrypting and decrypting passwords
@@ -154,18 +156,57 @@ def upload_profile_photo():
 	return redirect("/chat")
 
 
+# Clearing chat
+@app.route("/clear_chat", methods=['POST'])
+def clear_chat():
+	userid = request.form['userid']
+
+	# Retrieving message count between two users
+	sql = "SELECT * FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
+	row = db.session.execute(sql, {'u1id': session['userid'], 'u2id': userid})
+	data = next(row, None)
+
+	if data is not None:
+		chat_count = Chats_count.query.get_or_404(data['chatid'])
+		if data['user1id'] == session['userid']:
+			chat_count.clrCountUser1id = data['msgCount']
+		else:
+			chat_count.clrCountUser2id = data['msgCount']
+
+		cnt = min([chat_count.clrCountUser1id, chat_count.clrCountUser2id])
+		chat_count.msgCount -= cnt
+		chat_count.clrCountUser1id -= cnt
+		chat_count.clrCountUser2id -= cnt
+
+		if chat_count.msgCount == 0:
+			db.session.delete(chat_count)
+		db.session.commit()
+
+		db.engine.execute("DELETE FROM messages WHERE msgid IN (SELECT msgid FROM messages WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id) ORDER BY date_time LIMIT :cnt)", {
+			'u1id': session['userid'],
+			'u2id': userid,
+			'cnt': cnt
+		})		
+
+	return ""
+
+
 # Retrieving chats
 @app.route("/retrieve_chats", methods=['POST'])
 def retrieve_chats():
 	userid = request.form['userid']
 	msgCnt = int(request.form['msgCnt'])
+	remMsgCnt = 0
 
 	# Retrieving message count between two users
-	sql1 = "SELECT msgCount FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
+	sql1 = "SELECT * FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
 	row1 = db.session.execute(sql1, {'u1id': session['userid'], 'u2id': userid})
 	data1 = next(row1, None)
-	totalMsgCnt = 0 if data1 is None else data1['msgCount']
-	remMsgCnt = totalMsgCnt - msgCnt
+
+	if data1 is not None:
+		remMsgCnt = data1['msgCount']
+		msgCnt += data1['clrCountUser1id'] if data1['user1id'] == session['userid'] else data1['clrCountUser2id']
+	remMsgCnt -= msgCnt
 
 	# Retrieving messages between two users
 	sql2 = "SELECT user1id, message, date_time FROM messages WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id) ORDER BY date_time LIMIT :msgCnt, :remMsgCnt"

@@ -128,10 +128,25 @@ function chat(userid, user, img_status) {
 
 	document.getElementById("set-user-profile-img").setAttribute("onclick", "viewProfilePhoto('" + user + "');");
 	set_profile_photo("user-profile-img", "user-default-profile-img", "set-user-profile-img", user, img_status);
-
 	document.getElementById("user-name").innerHTML = user;
+	document.getElementById("current-user").style.display = "block";
+	document.getElementById("clear-chat").setAttribute("onclick", "clear_chat('" + userid + "', '" + user + "', '" + img_status + "')");
+	
 	document.getElementById("message").value = "";
 	document.getElementById("send").setAttribute("onclick", "sendMsg('"+ userid +"')");
+}
+
+// Clearing chat
+function clear_chat(userid, user, img_status) {
+	$("#clearChatModal").modal("hide");
+	$.ajax({
+		url: "/clear_chat",
+		method: "POST",
+		data: {userid:userid},
+		success: function() {	
+			chat(userid, user, img_status);
+		}
+	});
 }
 
 // Closing contact modal
@@ -142,15 +157,17 @@ function chatWithContact(userid, user, img_status) {
 
 // Sending Message
 function sendMsg(userid) {
-	let msg = document.getElementById("message").value;
-	$.ajax({
-		url: "/send_message",
-		method: "POST",
-		data: {userid:userid, msg:msg},
-		success: function() {
-			document.getElementById("message").value = "";
-		}
-	});
+	let msg = document.getElementById("message").value.trim();
+	if(msg.length !== 0) {
+		$.ajax({
+			url: "/send_message",
+			method: "POST",
+			data: {userid:userid, msg:msg},
+			success: function() {
+				document.getElementById("message").value = "";
+			}
+		});
+	}
 }
 
 // View Profile Photo of any user
