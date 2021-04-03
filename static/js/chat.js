@@ -130,8 +130,9 @@ function chat(userid, user, img_status) {
 	set_profile_photo("user-profile-img", "user-default-profile-img", "set-user-profile-img", user, img_status);
 	document.getElementById("user-name").innerHTML = user;
 	document.getElementById("current-user").style.display = "block";
-	document.getElementById("clear-chat").setAttribute("onclick", "clear_chat('" + userid + "', '" + user + "', '" + img_status + "')");
-	
+	document.getElementById("clear-chat").setAttribute("onclick", "clear_chat('" + userid + "', '" + user + "', '" + img_status + "');");
+	document.getElementById("export-chat").setAttribute("onclick", "export_chat('" + userid + "');");
+
 	document.getElementById("message").value = "";
 	document.getElementById("send").setAttribute("onclick", "sendMsg('"+ userid +"')");
 }
@@ -145,6 +146,23 @@ function clear_chat(userid, user, img_status) {
 		data: {userid:userid},
 		success: function() {	
 			chat(userid, user, img_status);
+		}
+	});
+}
+
+// Exporting chat
+function export_chat(userid) {
+	$.ajax({
+		url: "/export_chat",
+		method: "POST",
+		data: {userid:userid},
+		success: function(filename) {	
+			let download_link = document.createElement('a');
+			download_link.href = filename;
+			download_link.download = "";
+			document.body.appendChild(download_link);
+			download_link.click();
+			document.body.removeChild(download_link);
 		}
 	});
 }

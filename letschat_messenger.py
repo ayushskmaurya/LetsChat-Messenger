@@ -191,6 +191,48 @@ def clear_chat():
 	return ""
 
 
+# Exporting chat
+@app.route("/export_chat", methods=['POST'])
+def export_chat():
+	userid = request.form['userid']
+	remMsgCnt, msgCnt = 0, 0
+
+	# Retrieving message count between two users
+	sql1 = "SELECT * FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
+	row1 = db.session.execute(sql1, {'u1id': session['userid'], 'u2id': userid})
+	data1 = next(row1, None)
+
+	if data1 is not None:
+		remMsgCnt = data1['msgCount']
+		msgCnt += data1['clrCountUser1id'] if data1['user1id'] == session['userid'] else data1['clrCountUser2id']
+	remMsgCnt -= msgCnt
+
+	# Retrieving messages between two users
+	sql2 = "SELECT user1id, message, date_time FROM messages WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id) ORDER BY date_time LIMIT :msgCnt, :remMsgCnt"
+	row2 = db.session.execute(sql2, {
+		'u1id': session['userid'],
+		'u2id': userid,
+		'msgCnt': msgCnt,
+		'remMsgCnt': remMsgCnt
+	})
+
+	chat = ""
+	user1name = db.session.query(Users.name).filter_by(userid=session['userid']).first()[0]
+	user2name = db.session.query(Users.name).filter_by(userid=userid).first()[0]
+	for data in row2:
+		chat += "[" + data['date_time'][:19] + "] - "
+		chat += user1name if data['user1id'] == session['userid'] else user2name
+		chat += ": " + data['message'] + "\n"
+	
+	filename = "static/export_chats/Chat_" + user1name + "_" + user2name + ".txt"
+	with open(filename, 'w') as file:
+		file.seek(0)
+		file.truncate()
+		file.write(chat)
+	
+	return filename
+
+
 # Retrieving chats
 @app.route("/retrieve_chats", methods=['POST'])
 def retrieve_chats():
