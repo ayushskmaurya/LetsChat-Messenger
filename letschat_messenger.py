@@ -224,13 +224,13 @@ def export_chat():
 		chat += user1name if data['user1id'] == session['userid'] else user2name
 		chat += ": " + data['message'] + "\n"
 	
-	filename = "static/export_chats/Chat_" + user1name + "_" + user2name + ".txt"
+	filename = "static/export_chats/ " + str(session['userid']) + "_" + str(userid) + ".txt"
 	with open(filename, 'w') as file:
 		file.seek(0)
 		file.truncate()
 		file.write(chat)
 	
-	return filename
+	return {'filename': filename, 'user2name': user2name}
 
 
 # Retrieving chats

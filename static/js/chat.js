@@ -156,10 +156,10 @@ function export_chat(userid) {
 		url: "/export_chat",
 		method: "POST",
 		data: {userid:userid},
-		success: function(filename) {	
+		success: function(data) {	
 			let download_link = document.createElement('a');
-			download_link.href = filename;
-			download_link.download = "";
+			download_link.href = data['filename'];
+			download_link.download = "Chat with " + data['user2name'];
 			document.body.appendChild(download_link);
 			download_link.click();
 			document.body.removeChild(download_link);
