@@ -27,26 +27,23 @@ class Users(db.Model):
 
 
 class Contacts(db.Model):
-	contactid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	userid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
-	contactname = db.Column(db.String(100), nullable=False)
+	contactid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
+
+
+class Chats(db.Model):
+	chatid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	user1id = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
+	user2id = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
+	msgCount = db.Column(db.Integer, nullable=False)
 
 
 class Messages(db.Model):
 	msgid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-	user1id = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
-	user2id = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
+	chatid = db.Column(db.Integer, db.ForeignKey('chats.chatid'), nullable=False)
 	message = db.Column(db.Text)
 	date_time = db.Column(db.DateTime, nullable=False)
-
-
-class Chats_count(db.Model):
-	chatid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-	user1id = db.Column(db.Integer, db.ForeignKey('messages.user1id'), nullable=False)
-	user2id = db.Column(db.Integer, db.ForeignKey('messages.user2id'), nullable=False)
-	msgCount = db.Column(db.Integer, nullable=False)
-	clrCountUser1id = db.Column(db.Integer, default=0, nullable=False)
-	clrCountUser2id = db.Column(db.Integer, default=0, nullable=False)
 
 
 # Generating key for encrypting and decrypting passwords
@@ -115,26 +112,7 @@ def create_account():
 # Creating contact if valid user
 @app.route("/create_contact", methods=['POST'])
 def create_contact():
-	uname = request.form['uname']
-
-	if uname == session['username']:
-		return "Please enter valid username."
-	
-	else:
-		user = db.session.query(Contacts.contactid).filter_by(userid=session['userid'], contactname=uname).first()
-		if user is not None:
-			return "Contact already created."
-		
-		else:
-			user = db.session.query(Users.userid).filter_by(username=uname).first()
-			if user is None:
-				return "User " + uname + " doesn't exist."
-		
-			else:
-				contact = Contacts(userid=session['userid'], contactname=uname)
-				db.session.add(contact)
-				db.session.commit()
-				return "1"
+	return ""
 
 
 # Uploading user's profile photo.
@@ -159,146 +137,24 @@ def upload_profile_photo():
 # Clearing chat
 @app.route("/clear_chat", methods=['POST'])
 def clear_chat():
-	userid = request.form['userid']
-
-	# Retrieving message count between two users
-	sql = "SELECT * FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
-	row = db.session.execute(sql, {'u1id': session['userid'], 'u2id': userid})
-	data = next(row, None)
-
-	if data is not None:
-		chat_count = Chats_count.query.get_or_404(data['chatid'])
-		if data['user1id'] == session['userid']:
-			chat_count.clrCountUser1id = data['msgCount']
-		else:
-			chat_count.clrCountUser2id = data['msgCount']
-
-		cnt = min([chat_count.clrCountUser1id, chat_count.clrCountUser2id])
-		chat_count.msgCount -= cnt
-		chat_count.clrCountUser1id -= cnt
-		chat_count.clrCountUser2id -= cnt
-
-		if chat_count.msgCount == 0:
-			db.session.delete(chat_count)
-		db.session.commit()
-
-		db.engine.execute("DELETE FROM messages WHERE msgid IN (SELECT msgid FROM messages WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id) ORDER BY date_time LIMIT :cnt)", {
-			'u1id': session['userid'],
-			'u2id': userid,
-			'cnt': cnt
-		})		
-
 	return ""
 
 
 # Exporting chat
 @app.route("/export_chat", methods=['POST'])
-def export_chat():
-	userid = request.form['userid']
-	remMsgCnt, msgCnt = 0, 0
-
-	# Retrieving message count between two users
-	sql1 = "SELECT * FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
-	row1 = db.session.execute(sql1, {'u1id': session['userid'], 'u2id': userid})
-	data1 = next(row1, None)
-
-	if data1 is not None:
-		remMsgCnt = data1['msgCount']
-		msgCnt += data1['clrCountUser1id'] if data1['user1id'] == session['userid'] else data1['clrCountUser2id']
-	remMsgCnt -= msgCnt
-
-	# Retrieving messages between two users
-	sql2 = "SELECT user1id, message, date_time FROM messages WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id) ORDER BY date_time LIMIT :msgCnt, :remMsgCnt"
-	row2 = db.session.execute(sql2, {
-		'u1id': session['userid'],
-		'u2id': userid,
-		'msgCnt': msgCnt,
-		'remMsgCnt': remMsgCnt
-	})
-
-	chat = ""
-	user1name = db.session.query(Users.name).filter_by(userid=session['userid']).first()[0]
-	user2name = db.session.query(Users.name).filter_by(userid=userid).first()[0]
-	for data in row2:
-		chat += "[" + data['date_time'][:19] + "] - "
-		chat += user1name if data['user1id'] == session['userid'] else user2name
-		chat += ": " + data['message'] + "\n"
-	
-	filename = "static/export_chats/ " + str(session['userid']) + "_" + str(userid) + ".txt"
-	with open(filename, 'w') as file:
-		file.seek(0)
-		file.truncate()
-		file.write(chat)
-	
-	return {'filename': filename, 'user2name': user2name}
+def export_chat():	
+	return ""
 
 
 # Retrieving chats
 @app.route("/retrieve_chats", methods=['POST'])
 def retrieve_chats():
-	userid = request.form['userid']
-	msgCnt = int(request.form['msgCnt'])
-	remMsgCnt = 0
-
-	# Retrieving message count between two users
-	sql1 = "SELECT * FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
-	row1 = db.session.execute(sql1, {'u1id': session['userid'], 'u2id': userid})
-	data1 = next(row1, None)
-
-	if data1 is not None:
-		remMsgCnt = data1['msgCount']
-		msgCnt += data1['clrCountUser1id'] if data1['user1id'] == session['userid'] else data1['clrCountUser2id']
-	remMsgCnt -= msgCnt
-
-	# Retrieving messages between two users
-	sql2 = "SELECT user1id, message, date_time FROM messages WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id) ORDER BY date_time LIMIT :msgCnt, :remMsgCnt"
-	row2 = db.session.execute(sql2, {
-		'u1id': session['userid'],
-		'u2id': userid,
-		'msgCnt': msgCnt,
-		'remMsgCnt': remMsgCnt
-	})
-
-	msgData = []
-	for data in row2:
-		msgData.append({
-			'message': escape(data['message']),
-			'date_time': data['date_time'][:19],
-			'who': 1 if data['user1id'] == session['userid'] else 0
-		})
-	return jsonify(msgData)
+	return ""
 
 
 # Sending Message
 @app.route("/send_message", methods=['POST'])
 def send_message():
-	userid = request.form['userid']
-	msg = request.form['msg']
-	
-	# Inserting message into database table
-	message = Messages(user1id=session['userid'], user2id=userid, message=msg, date_time=datetime.now())
-	db.session.add(message)
-	db.session.commit()
-	
-	# Retrieving message count between two users
-	sql = "SELECT chatid, msgCount FROM chats_count WHERE user1id IN (:u1id, :u2id) AND user2id IN (:u1id, :u2id)"
-	row = db.session.execute(sql, {'u1id': session['userid'], 'u2id': userid})
-	data = next(row, None)
-
-	# If it's first time that two users are chatting
-	# then inserting message count as 1
-	if data is None:
-		chat_count = Chats_count(user1id=session['userid'], user2id=userid, msgCount=1)
-		db.session.add(chat_count)
-		db.session.commit()
-
-	# If two users had a chat before
-	# then updating message count by incrementing the current count by 1
-	else:
-		chat_count = Chats_count.query.get_or_404(data['chatid'])
-		chat_count.msgCount += 1
-		db.session.commit()
-
 	return ""
 
 
@@ -315,27 +171,7 @@ def chat():
 		return redirect("/")
 	
 	else:
-		sql1 = "SELECT userid, username, profile_img_status FROM users WHERE "
-		sql1 += "userid IN (SELECT user1id FROM chats_count WHERE user2id=:userid) OR "
-		sql1 += "userid IN (SELECT user2id FROM chats_count WHERE user1id=:userid) "
-		sql1 += "ORDER BY username"
-		chats = db.session.execute(sql1, {'userid': session['userid']})
-
-		name, profile_img_status = db.session.query(Users.name, Users.profile_img_status).filter_by(userid=session['userid']).first()
-
-		sql2 = "SELECT users.userid, users.profile_img_status, contacts.contactname "
-		sql2 += "FROM contacts INNER JOIN users ON contacts.contactname = users.username "
-		sql2 += "WHERE contacts.userid = :userid ORDER BY contacts.contactname"
-		contacts = db.session.execute(sql2, {'userid': session['userid']})
-
-	return render_template("chat.html",
-		cdt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")[:19],
-		chats = chats,
-		name = name,
-		profile_img_status = profile_img_status,
-		contacts = contacts,
-		uname = session['username']
-	)
+		return render_template("chat.html")
 
 
 @app.route("/signout")
