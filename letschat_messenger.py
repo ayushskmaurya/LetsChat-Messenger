@@ -112,7 +112,26 @@ def create_account():
 # Creating contact if valid user
 @app.route("/create_contact", methods=['POST'])
 def create_contact():
-	return ""
+	uname = request.form['uname']
+
+	if uname == session['username']:
+		return "Please enter valid username."
+	else:
+		user = db.session.query(Users.userid).filter_by(username=uname).first()
+
+		if user is None:
+			return "User " + uname + " doesn't exist."
+		else:
+			userid = user[0]
+			existing_contact = db.session.query(Contacts.contactid).filter_by(userid=session['userid'], contactid=userid).first()
+			
+			if existing_contact is not None:
+				return "Contact already created."
+			else:
+				contact = Contacts(userid=session['userid'], contactid=userid)
+				db.session.add(contact)
+				db.session.commit()
+				return "1"
 
 
 # Uploading user's profile photo.
