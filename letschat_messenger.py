@@ -43,6 +43,7 @@ class Contacts(db.Model):
 class Messages(db.Model):
 	msgid = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	chatid = db.Column(db.Integer, db.ForeignKey('chats.chatid'), nullable=False)
+	senderid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
 	message = db.Column(db.Text)
 	date_time = db.Column(db.DateTime, nullable=False)
 
@@ -201,7 +202,26 @@ def chat():
 		return redirect("/")
 	
 	else:
-		return render_template("chat.html")
+		sql1 = "SELECT c.chatid, u.username, u.profile_img_status FROM users u INNER JOIN "
+		sql1 += "(SELECT chatid, CASE WHEN user1id = :userid THEN user2id WHEN user2id = :userid THEN user1id ELSE NULL END AS userid, msgCount FROM chats) AS c "
+		sql1 += "ON u.userid = c.userid WHERE c.msgCount <> 0 ORDER BY u.username"
+		chats = db.session.execute(sql1, {'userid': session['userid']})
+
+		name, profile_img_status = db.session.query(Users.name, Users.profile_img_status).filter_by(userid=session['userid']).first()
+
+		sql2 = "SELECT c.chatid, u.username, u.profile_img_status "
+		sql2 += "FROM users u INNER JOIN contacts c ON u.userid = c.contactid "
+		sql2 += "WHERE c.userid = :userid ORDER BY u.username"
+		contacts = db.session.execute(sql2, {'userid': session['userid']})
+
+	return render_template("chat.html",
+		cdt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")[:19],
+		chats = chats,
+		name = name,
+		profile_img_status = profile_img_status,
+		contacts = contacts,
+		uname = session['username']
+	)
 
 
 @app.route("/signout")

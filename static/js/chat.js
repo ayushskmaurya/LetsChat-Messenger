@@ -113,7 +113,7 @@ function retrieve_chats(userid) {
 // Chat Window
 var msgCnt = 0;
 var ID = 0;
-function chat(userid, user, img_status) {
+function chat(chatid, user, img_status) {
 
 	if(window.innerWidth < 576) {
 		chatsDiv.style.display = "none";
@@ -124,17 +124,17 @@ function chat(userid, user, img_status) {
 	document.getElementById("chat-window").innerHTML = "";
 	msgCnt = 0;
 	window.clearInterval(ID);
-	ID = window.setInterval(retrieve_chats, 1000, userid);
+	ID = window.setInterval(retrieve_chats, 1000, chatid);
 
 	document.getElementById("set-user-profile-img").setAttribute("onclick", "viewProfilePhoto('" + user + "');");
 	set_profile_photo("user-profile-img", "user-default-profile-img", "set-user-profile-img", user, img_status);
 	document.getElementById("user-name").innerHTML = user;
 	document.getElementById("current-user").style.display = "block";
-	document.getElementById("clear-chat").setAttribute("onclick", "clear_chat('" + userid + "', '" + user + "', '" + img_status + "');");
-	document.getElementById("export-chat").setAttribute("onclick", "export_chat('" + userid + "');");
+	document.getElementById("clear-chat").setAttribute("onclick", "clear_chat('" + chatid + "', '" + user + "', '" + img_status + "');");
+	document.getElementById("export-chat").setAttribute("onclick", "export_chat('" + chatid + "');");
 
 	document.getElementById("message").value = "";
-	document.getElementById("send").setAttribute("onclick", "sendMsg('"+ userid +"')");
+	document.getElementById("send").setAttribute("onclick", "sendMsg('"+ chatid +"')");
 }
 
 // Clearing chat
@@ -145,7 +145,7 @@ function clear_chat(userid, user, img_status) {
 		method: "POST",
 		data: {userid:userid},
 		success: function() {	
-			chat(userid, user, img_status);
+			chat(chatid, user, img_status);
 		}
 	});
 }
@@ -170,7 +170,7 @@ function export_chat(userid) {
 // Closing contact modal
 function chatWithContact(userid, user, img_status) {
 	$("#contactsModal").modal("hide");
-	chat(userid, user, img_status);
+	chat(chatid, user, img_status);
 }
 
 // Sending Message

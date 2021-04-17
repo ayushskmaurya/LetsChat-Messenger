@@ -33,10 +33,10 @@
 			</div>
 			{% for chat in chats %}
 				<script>document.getElementById("create-contact-msg").style.display="none";</script>
-				{% set userid = chat['userid'] %}
+				{% set chatid = chat['chatid'] %}
 				{% set username = chat['username'] %}
 				{% set img_status = chat['profile_img_status'] %}
-				<button class="user-chat" onclick="chat('{{ userid }}', '{{ username }}', '{{ img_status }}');">
+				<button class="user-chat" onclick="chat('{{ chatid }}', '{{ username }}', '{{ img_status }}');">
 		
 					<div class="profile-image" id="user-{{ username }}-default-profile-img" style="color: #321e46;">
 						{% include 'default_profile_img.html' %}
@@ -118,21 +118,21 @@
 			</div>
 			<div class="modal-body">
 				{% for contact in contacts %}
-					{% set userid = contact['userid'] %}
-					{% set contactname = contact['contactname'] %}
+					{% set chatid = contact['chatid'] %}
+					{% set username = contact['username'] %}
 					{% set img_status = contact['profile_img_status'] %}
-					<button class="contact" onclick="chatWithContact('{{ userid }}', '{{ contactname }}', '{{ img_status }}');">
+					<button class="contact" onclick="chatWithContact('{{ chatid }}', '{{ username }}', '{{ img_status }}');">
 					
-						<div class="profile-image" id="contact-{{ contactname }}-default-profile-img" style="color: #321e46;">
+						<div class="profile-image" id="contact-{{ username }}-default-profile-img" style="color: #321e46;">
 							{% include 'default_profile_img.html' %}
 						</div>
-						<div class="profile-image" id="contact-{{ contactname }}-profile-img" style="display: none;">
-							<img class="profile-image" id="set-contact-{{ contactname }}-profile-img" src="#" onclick="viewProfilePhoto('{{ contactname }}');">
+						<div class="profile-image" id="contact-{{ username }}-profile-img" style="display: none;">
+							<img class="profile-image" id="set-contact-{{ username }}-profile-img" src="#" onclick="viewProfilePhoto('{{ username }}');">
 						</div>
 
-						{{ contactname }}
+						{{ username }}
 					</button>
-					<script>set_profile_photo("contact-{{ contactname }}-profile-img", "contact-{{ contactname }}-default-profile-img", "set-contact-{{ contactname }}-profile-img", "{{ contactname }}", "{{ img_status }}");</script>
+					<script>set_profile_photo("contact-{{ username }}-profile-img", "contact-{{ username }}-default-profile-img", "set-contact-{{ username }}-profile-img", "{{ username }}", "{{ img_status }}");</script>
 				{% endfor %}
 			</div>
 		</div>
