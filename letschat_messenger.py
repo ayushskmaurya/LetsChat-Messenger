@@ -26,17 +26,18 @@ class Users(db.Model):
 	profile_img_status = db.Column(db.Boolean, default=False, nullable=False)
 
 
-class Contacts(db.Model):
-	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-	userid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
-	contactid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
-
-
 class Chats(db.Model):
 	chatid = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	user1id = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
 	user2id = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
 	msgCount = db.Column(db.Integer, nullable=False)
+
+
+class Contacts(db.Model):
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	userid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
+	contactid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
+	chatid = db.Column(db.Integer, db.ForeignKey('chats.chatid'), nullable=False)
 
 
 class Messages(db.Model):
@@ -128,7 +129,17 @@ def create_contact():
 			if existing_contact is not None:
 				return "Contact already created."
 			else:
-				contact = Contacts(userid=session['userid'], contactid=userid)
+				existing_chat = db.session.query(Contacts.chatid).filter_by(userid=userid, contactid=session['userid']).first()
+				
+				if existing_chat is not None:
+					chatid = existing_chat[0]
+				else:
+					chat = Chats(user1id=session['userid'], user2id=userid, msgCount=0)
+					db.session.add(chat)
+					db.session.commit()
+					chatid = chat.chatid
+
+				contact = Contacts(userid=session['userid'], contactid=userid, chatid=chatid)
 				db.session.add(contact)
 				db.session.commit()
 				return "1"
