@@ -151,11 +151,11 @@ function clear_chat(chatid, user, img_status) {
 }
 
 // Exporting chat
-function export_chat(userid) {
+function export_chat(chatid) {
 	$.ajax({
 		url: "/export_chat",
 		method: "POST",
-		data: {userid:userid},
+		data: {chatid:chatid},
 		success: function(data) {	
 			let download_link = document.createElement('a');
 			download_link.href = data['filename'];

@@ -208,7 +208,42 @@ def clear_chat():
 # Exporting chat
 @app.route("/export_chat", methods=['POST'])
 def export_chat():	
-	return ""
+	chatid = request.form['chatid']
+
+	# Retrieving messages between two users
+	sql1 = "SELECT senderid, message, date_time FROM messages WHERE chatid = :chatid AND msgid NOT IN "
+	sql1 += "(SELECT msgid FROM cleared_chats WHERE chatid = :chatid AND userid = :userid) "
+	sql1 += "ORDER BY date_time"
+	row1 = db.session.execute(sql1, {
+		'chatid': chatid,
+		'userid': session['userid']
+	})
+
+	# Retrieving name of the user
+	rec1 = db.session.query(Users.name).filter_by(userid=session['userid']).first()
+	user1name = rec1.name if rec1 is not None else ""
+
+	# Retrieving name of other user
+	sql2 = "SELECT name FROM users WHERE userid = (SELECT "
+	sql2 += "CASE WHEN user1id = :userid THEN user2id ELSE user1id END "
+	sql2 += "AS userid FROM chats WHERE chatid = :chatid)"
+	row2 = db.session.execute(sql2, {'userid': session['userid'], 'chatid': chatid})
+	rec2 = next(row2, None)
+	user2name = rec2.name if rec2 is not None else ""
+	
+	chat = ""
+	for data in row1:
+		chat += "[" + data['date_time'][:19] + "] - "
+		chat += user1name if data['senderid'] == session['userid'] else user2name
+		chat += ": " + data['message'] + "\n"
+	
+	filename = "static/export_chats/" + str(session['userid']) + "_" + str(chatid) + ".txt"
+	with open(filename, 'w') as file:
+		file.seek(0)
+		file.truncate()
+		file.write(chat)
+	
+	return {'filename': filename, 'user2name': user2name}
 
 
 # Retrieving chats
@@ -216,12 +251,10 @@ def export_chat():
 def retrieve_chats():
 	chatid = request.form['chatid']
 	msgCnt = int(request.form['msgCnt'])
-	remMsgCnt = 0
 
 	# Calculating count of remaining messages which are not retrieved yet
 	data = db.session.query(Chats.msgCount).filter_by(chatid=chatid).first()
-	if data is not None:
-		remMsgCnt = data[0]
+	remMsgCnt = data[0] if data is not None else 0
 	remMsgCnt -= msgCnt
 	
 	# Retrieving messages between two users
@@ -272,6 +305,7 @@ def chat():
 		return redirect("/")
 	
 	else:
+		# Retrieving all the chats of user
 		sql1 = "SELECT c.chatid, u.username, u.profile_img_status FROM users u INNER JOIN "
 		sql1 += "(SELECT chatid, CASE WHEN user1id = :userid THEN user2id WHEN user2id = :userid THEN user1id ELSE NULL END AS userid, msgCount FROM chats) AS c "
 		sql1 += "ON u.userid = c.userid WHERE c.msgCount <> 0 ORDER BY u.username"
@@ -279,6 +313,7 @@ def chat():
 
 		name, profile_img_status = db.session.query(Users.name, Users.profile_img_status).filter_by(userid=session['userid']).first()
 
+		# Retrieving all the contacts of user
 		sql2 = "SELECT c.chatid, u.username, u.profile_img_status "
 		sql2 += "FROM users u INNER JOIN contacts c ON u.userid = c.contactid "
 		sql2 += "WHERE c.userid = :userid ORDER BY u.username"
