@@ -138,12 +138,12 @@ function chat(chatid, user, img_status) {
 }
 
 // Clearing chat
-function clear_chat(userid, user, img_status) {
+function clear_chat(chatid, user, img_status) {
 	$("#clearChatModal").modal("hide");
 	$.ajax({
 		url: "/clear_chat",
 		method: "POST",
-		data: {userid:userid},
+		data: {chatid:chatid},
 		success: function() {	
 			chat(chatid, user, img_status);
 		}

@@ -48,6 +48,13 @@ class Messages(db.Model):
 	date_time = db.Column(db.DateTime, nullable=False)
 
 
+class Cleared_chats(db.Model):
+	clrid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	userid = db.Column(db.Integer, db.ForeignKey('users.userid'), nullable=False)
+	chatid = db.Column(db.Integer, db.ForeignKey('chats.chatid'), nullable=False)
+	msgid = db.Column(db.Integer, db.ForeignKey('messages.msgid'), nullable=False)
+
+
 # Generating key for encrypting and decrypting passwords
 def create_key():
 	if len(Created_key.query.all()) == 0:
@@ -168,6 +175,33 @@ def upload_profile_photo():
 # Clearing chat
 @app.route("/clear_chat", methods=['POST'])
 def clear_chat():
+	chatid = request.form['chatid']
+
+	# Deleting the messages which are already cleared by other user
+	cleared = db.session.query(Cleared_chats.msgid).filter(Cleared_chats.chatid == chatid, Cleared_chats.userid != session['userid']).all()
+	chat = db.session.query(Chats).filter_by(chatid=chatid).first()
+	for rec in cleared:
+		msg = db.session.query(Messages).filter_by(msgid=rec.msgid).first()
+		clr = db.session.query(Cleared_chats).filter_by(msgid=rec.msgid).first()
+		
+		if chat is not None and msg is not None and clr is not None:
+			db.session.delete(msg)
+			db.session.delete(clr)
+			chat.msgCount -= 1
+	db.session.commit()
+
+	# Clearing the messages which are not cleared by other user
+	sql = "SELECT msgid FROM messages WHERE chatid = :chatid AND msgid NOT IN "
+	sql += "(SELECT msgid FROM cleared_chats WHERE chatid = :chatid AND userid = :userid)"
+	row = db.session.execute(sql, {
+		'chatid': chatid,
+		'userid': session['userid']
+	})
+	for data in row:
+		clr_msg = Cleared_chats(userid=session['userid'], chatid=chatid, msgid=data['msgid'])
+		db.session.add(clr_msg)
+	db.session.commit()
+
 	return ""
 
 
@@ -191,9 +225,12 @@ def retrieve_chats():
 	remMsgCnt -= msgCnt
 	
 	# Retrieving messages between two users
-	sql = "SELECT senderid, message, date_time FROM messages WHERE chatid = :chatid ORDER BY date_time LIMIT :msgCnt, :remMsgCnt"
+	sql = "SELECT senderid, message, date_time FROM messages WHERE chatid = :chatid AND msgid NOT IN "
+	sql += "(SELECT msgid FROM cleared_chats WHERE chatid = :chatid AND userid = :userid) "
+	sql += "ORDER BY date_time LIMIT :msgCnt, :remMsgCnt"
 	row = db.session.execute(sql, {
 		'chatid': chatid,
+		'userid': session['userid'],
 		'msgCnt': msgCnt,
 		'remMsgCnt': remMsgCnt
 	})
