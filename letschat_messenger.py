@@ -180,12 +180,45 @@ def export_chat():
 # Retrieving chats
 @app.route("/retrieve_chats", methods=['POST'])
 def retrieve_chats():
-	return ""
+	chatid = request.form['chatid']
+	msgCnt = int(request.form['msgCnt'])
+	remMsgCnt = 0
 
+	# Calculating count of remaining messages which are not retrieved yet
+	data = db.session.query(Chats.msgCount).filter_by(chatid=chatid).first()
+	if data is not None:
+		remMsgCnt = data[0]
+	remMsgCnt -= msgCnt
+	
+	# Retrieving messages between two users
+	sql = "SELECT senderid, message, date_time FROM messages WHERE chatid = :chatid ORDER BY date_time LIMIT :msgCnt, :remMsgCnt"
+	row = db.session.execute(sql, {
+		'chatid': chatid,
+		'msgCnt': msgCnt,
+		'remMsgCnt': remMsgCnt
+	})
+
+	msgData = []
+	for data in row:
+		msgData.append({
+			'message': escape(data['message']),
+			'date_time': data['date_time'][:19],
+			'who': 1 if data['senderid'] == session['userid'] else 0
+		})
+	return jsonify(msgData)
+	
 
 # Sending Message
 @app.route("/send_message", methods=['POST'])
 def send_message():
+	chatid = request.form['chatid']
+	msg = request.form['msg']
+
+	message = Messages(chatid=chatid, senderid=session['userid'], message=msg, date_time=datetime.now())
+	db.session.add(message)
+	chat = Chats.query.get_or_404(chatid)
+	chat.msgCount += 1
+	db.session.commit()
 	return ""
 
 

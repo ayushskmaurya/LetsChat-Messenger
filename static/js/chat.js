@@ -76,11 +76,11 @@ function msgFormat(who) {
 }
 
 // Retrieving chats
-function retrieve_chats(userid) {
+function retrieve_chats(chatid) {
 	$.ajax({
 		url: "/retrieve_chats",
 		method: "POST",
-		data: {userid:userid, msgCnt:msgCnt},
+		data: {chatid:chatid, msgCnt:msgCnt},
 		success: function(msgData) {
 			for(let data of msgData) {
 				let msg_dt;
@@ -168,19 +168,19 @@ function export_chat(userid) {
 }
 
 // Closing contact modal
-function chatWithContact(userid, user, img_status) {
+function chatWithContact(chatid, user, img_status) {
 	$("#contactsModal").modal("hide");
 	chat(chatid, user, img_status);
 }
 
 // Sending Message
-function sendMsg(userid) {
+function sendMsg(chatid) {
 	let msg = document.getElementById("message").value.trim();
 	if(msg.length !== 0) {
 		$.ajax({
 			url: "/send_message",
 			method: "POST",
-			data: {userid:userid, msg:msg},
+			data: {chatid:chatid, msg:msg},
 			success: function() {
 				document.getElementById("message").value = "";
 			}
